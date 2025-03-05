@@ -29,6 +29,7 @@ A command-line application for tracking your progress reading the New World Tran
 - Python 3.7 or higher
 - No internet connection required for normal use (all Bible content is included offline)
 - Libraries: requests, beautifulsoup4, rich
+- A modern terminal with good Unicode and color support (see Terminal Compatibility section)
 
 ## Terminal Compatibility
 
@@ -39,6 +40,11 @@ This application uses the `rich` library to create formatted text, tables, progr
 #### Windows (Best Experience)
 - **Windows Terminal** - Microsoft's modern terminal with full support for rich formatting
 - **PowerShell 7 with Windows Terminal** - Ideal combination for the best display quality
+
+#### macOS
+- **iTerm2** - Much better than the default Terminal.app, with full support for colors and formatting
+- **Alacritty** - A fast, cross-platform terminal emulator with good formatting support
+- **Kitty** - Fast, feature-rich terminal that handles rich formatting well
 
 #### Linux
 Some formatting issues have been observed in certain Linux terminals. For the best experience on Linux, use:
@@ -57,21 +63,47 @@ If you experience display issues, particularly with progress bars or special cha
 
 ## Installation
 
-1. **Clone the repository**
+1. **Prerequisites**
+   - **Python**: Make sure Python 3.7 or higher is installed
+     - [Download Python](https://www.python.org/downloads/) if not already installed
+     - During installation, ensure "Add Python to PATH" is checked (Windows)
+   - **Pip**: The Python package installer should come with Python
+     - If you don't have pip, [install it following these instructions](https://pip.pypa.io/en/stable/installation/)
+     - Verify installation with `pip --version` in your terminal
+
+2. **Clone or download the repository**
 ```bash
 git clone https://github.com/yourusername/bible-study-tracker.git
 cd bible-study-tracker
 ```
+   - Alternatively, download the ZIP file from GitHub and extract it to a folder
 
-2. **Install dependencies**
+3. **Install dependencies**
+The application requires the following Python libraries:
+```bash
+pip install requests beautifulsoup4 rich
+```
+Or use the requirements file:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Run the application**
+4. **Terminal Setup (Optional but Recommended)**
+   - **Windows**: Install [Windows Terminal](https://aka.ms/terminal) from the Microsoft Store
+   - **macOS**: Install [iTerm2](https://iterm2.com/) for better formatting
+   - **All Platforms**: Install a [Nerd Font](https://www.nerdfonts.com/) like Cascadia Code or JetBrains Mono
+
+4. **Run the application**
+The application must be run from the root directory of the project where the `bible-tracker.py` file is located.
+
 ```bash
 python bible-tracker.py
 ```
+
+**Tip**: Most operating systems allow you to open a terminal directly in the project directory:
+- **Windows**: Right-click in the folder and select "Open in Terminal" or "Open PowerShell window here"
+- **macOS**: Right-click and select "New Terminal at Folder" (may require enabling in Finder preferences)
+- **Linux**: Right-click and select "Open in Terminal" (varies by distribution)
 
 **Important Note**: The repository includes a complete `bible_tracker.db` file with all 66 books of the Bible already downloaded for offline use. No internet connection or downloading from JW.org is necessary for normal operation.
 
@@ -163,7 +195,7 @@ The app uses SQLite to store all data in a single file (`bible_tracker.db`) with
 ### Platform-Specific Issues
 - **Windows**: The app works best on Windows Terminal. Traditional Command Prompt may have limited formatting support.
 - **Linux**: If using WSL on Windows, consider running the program natively in Windows Terminal instead for better formatting.
-- **Mac**: Terminal.app has limited support for some formatting. Consider using iTerm2 for a better experience.
+- **macOS**: The default Terminal.app has limited support for some rich text formatting features. iTerm2 is strongly recommended for a better experience.
 
 ## Respecting JW.org Resources
 
