@@ -1480,193 +1480,198 @@ def export_bible_menu():
 
 def read_downloaded_book():
     """Read a downloaded book in a nice interface."""
-    console.clear()
-    console.print(Panel.fit("[bold blue]Read Bible[/bold blue]", box=box.SIMPLE))
-    
-    # Get downloaded books
-    downloaded_books = get_downloaded_books()
-    
-    if not downloaded_books:
-        console.print("[yellow]No books have been downloaded yet. Please download books first.[/yellow]")
-        console.input("\nPress Enter to return to the dashboard...")
-        return
-    
-    console.print("\n[bold]Select a downloaded book to read:[/bold]")
-    
-    # Display books in a table
-    book_table = Table(show_header=False, box=box.SIMPLE)
-    cols = 4
-    for _ in range(cols):
-        book_table.add_column("", justify="left")
-    
-    # Fill the table with books
-    rows = []
-    row = []
-    for i, book in enumerate(downloaded_books):
-        row.append(f"{i+1}. {book}")
-        if (i + 1) % cols == 0:
-            rows.append(row)
-            row = []
-    
-    # Add any remaining books
-    if row:
-        while len(row) < cols:
-            row.append("")
-        rows.append(row)
-    
-    # Add rows to the table
-    for row in rows:
-        book_table.add_row(*row)
-    
-    console.print(book_table)
-    
-    # Get book selection
-    book_choice = console.input("\n[bold]Enter book number or name:[/bold] ").strip()
-    
-    selected_book = None
-    try:
-        book_idx = int(book_choice) - 1
-        if 0 <= book_idx < len(downloaded_books):
-            selected_book = downloaded_books[book_idx]
-    except ValueError:
-        # Try to match by name
-        for book in downloaded_books:
-            if book_choice.lower() in book.lower():
-                selected_book = book
-                break
-    
-    if not selected_book:
-        console.print("[red]Invalid book selection.[/red]")
-        console.input("\nPress Enter to return to the dashboard...")
-        return
-    
-    # Get chapters for this book
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT id FROM books WHERE name = ?", (selected_book,))
-    book_id = cursor.fetchone()[0]
-    
-    cursor.execute(
-        "SELECT total_chapters FROM books WHERE id = ?",
-        (book_id,)
-    )
-    total_chapters = cursor.fetchone()[0]
-    
-    # Select chapter
-    console.print(f"\n[bold]{selected_book} has {total_chapters} chapters.[/bold]")
-    chapter_choice = console.input("\n[bold]Enter chapter number:[/bold] ").strip()
-    
-    try:
-        chapter = int(chapter_choice)
-        if chapter < 1 or chapter > total_chapters:
-            console.print(f"[red]Chapter must be between 1 and {total_chapters}.[/red]")
-            conn.close()
+    while True:  # Add this outer loop
+        console.clear()
+        console.print(Panel.fit("[bold blue]Read Bible[/bold blue]", box=box.SIMPLE))
+        
+        # Get downloaded books
+        downloaded_books = get_downloaded_books()
+        
+        if not downloaded_books:
+            console.print("[yellow]No books have been downloaded yet. Please download books first.[/yellow]")
             console.input("\nPress Enter to return to the dashboard...")
             return
-    except ValueError:
-        console.print("[red]Invalid chapter number.[/red]")
-        conn.close()
-        console.input("\nPress Enter to return to the dashboard...")
-        return
-    
-    # Get verses for this chapter
-    cursor.execute(
-        "SELECT verse_number, verse_text FROM verses WHERE book_id = ? AND chapter_number = ? ORDER BY verse_number",
-        (book_id, chapter)
-    )
-    verses = cursor.fetchall()
-    conn.close()
-    
-    if not verses:
-        console.print(f"[yellow]No verses found for {selected_book} {chapter}. This chapter may not be downloaded.[/yellow]")
-        console.input("\nPress Enter to return to the dashboard...")
-        return
-    
-    # Display the chapter
-    while True:
-        console.clear()
-        console.print(Panel.fit(f"[bold blue]{selected_book} Chapter {chapter}[/bold blue]", box=box.DOUBLE))
         
-        # Display verses with nice formatting
-        verse_panel = Panel(
-            "\n".join([f"[bold cyan]{v[0]}[/bold cyan] {v[1]}" for v in verses]),
-            title=f"{selected_book} {chapter}",
-            title_align="left",
-            border_style="green",
-            padding=(1, 2),
-            width=100
-        )
-        console.print(verse_panel)
+        console.print("\n[bold]Select a downloaded book to read:[/bold]")
         
-        # Navigation options
-        console.print("\n[bold]Navigation:[/bold]")
-        console.print("  [cyan]p[/cyan] - Previous chapter")
-        console.print("  [cyan]n[/cyan] - Next chapter")
-        console.print("  [cyan]m[/cyan] - Mark as current reading position")
-        console.print("  [cyan]b[/cyan] - Back to book selection")
-        console.print("  [cyan]q[/cyan] - Back to main menu")
+        # Display books in a table
+        book_table = Table(show_header=False, box=box.SIMPLE)
+        cols = 4
+        for _ in range(cols):
+            book_table.add_column("", justify="left")
         
-        nav_choice = console.input("\n[bold]Choose an option:[/bold] ").strip().lower()
+        # Fill the table with books
+        rows = []
+        row = []
+        for i, book in enumerate(downloaded_books):
+            row.append(f"{i+1}. {book}")
+            if (i + 1) % cols == 0:
+                rows.append(row)
+                row = []
         
-        if nav_choice == 'p':
-            if chapter > 1:
-                chapter -= 1
-                
-                conn = sqlite3.connect(DB_PATH)
-                cursor = conn.cursor()
-                
-                cursor.execute(
-                    "SELECT verse_number, verse_text FROM verses WHERE book_id = ? AND chapter_number = ? ORDER BY verse_number",
-                    (book_id, chapter)
-                )
-                verses = cursor.fetchall()
-                conn.close()
-                
-                if not verses:
-                    console.print(f"[yellow]No verses found for {selected_book} {chapter}. This chapter may not be downloaded.[/yellow]")
-                    console.input("\nPress Enter to continue...")
-                    chapter += 1  # Revert to previous chapter
-            else:
-                console.print("[yellow]Already at the first chapter.[/yellow]")
-                console.input("\nPress Enter to continue...")
+        # Add any remaining books
+        if row:
+            while len(row) < cols:
+                row.append("")
+            rows.append(row)
         
-        elif nav_choice == 'n':
-            if chapter < total_chapters:
-                chapter += 1
-                
-                conn = sqlite3.connect(DB_PATH)
-                cursor = conn.cursor()
-                
-                cursor.execute(
-                    "SELECT verse_number, verse_text FROM verses WHERE book_id = ? AND chapter_number = ? ORDER BY verse_number",
-                    (book_id, chapter)
-                )
-                verses = cursor.fetchall()
-                conn.close()
-                
-                if not verses:
-                    console.print(f"[yellow]No verses found for {selected_book} {chapter}. This chapter may not be downloaded.[/yellow]")
-                    console.input("\nPress Enter to continue...")
-                    chapter -= 1  # Revert to previous chapter
-            else:
-                console.print("[yellow]Already at the last chapter.[/yellow]")
-                console.input("\nPress Enter to continue...")
+        # Add rows to the table
+        for row in rows:
+            book_table.add_row(*row)
         
-        elif nav_choice == 'm':
-            update_progress(selected_book, chapter, 1)
-            console.print(f"[green]✓ Set {selected_book} {chapter}:1 as current reading position.[/green]")
-            console.input("\nPress Enter to continue...")
+        console.print(book_table)
         
-        elif nav_choice == 'b':
-            break
+        # Get book selection
+        book_choice = console.input("\n[bold]Enter book number or name (or q to quit):[/bold] ").strip()
         
-        elif nav_choice == 'q':
+        if book_choice.lower() == 'q':  # Add this option to exit
             return
+            
+        selected_book = None
+        try:
+            book_idx = int(book_choice) - 1
+            if 0 <= book_idx < len(downloaded_books):
+                selected_book = downloaded_books[book_idx]
+        except ValueError:
+            # Try to match by name
+            for book in downloaded_books:
+                if book_choice.lower() in book.lower():
+                    selected_book = book
+                    break
         
-        else:
-            console.print("[red]Invalid choice.[/red]")
-            console.input("\nPress Enter to continue...")
+        if not selected_book:
+            console.print("[red]Invalid book selection.[/red]")
+            console.input("\nPress Enter to try again...")
+            continue  # Go back to book selection
+        
+        # Get chapters for this book
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT id FROM books WHERE name = ?", (selected_book,))
+        book_id = cursor.fetchone()[0]
+        
+        cursor.execute(
+            "SELECT total_chapters FROM books WHERE id = ?",
+            (book_id,)
+        )
+        total_chapters = cursor.fetchone()[0]
+        
+        # Select chapter
+        console.print(f"\n[bold]{selected_book} has {total_chapters} chapters.[/bold]")
+        chapter_choice = console.input("\n[bold]Enter chapter number:[/bold] ").strip()
+        
+        try:
+            chapter = int(chapter_choice)
+            if chapter < 1 or chapter > total_chapters:
+                console.print(f"[red]Chapter must be between 1 and {total_chapters}.[/red]")
+                conn.close()
+                console.input("\nPress Enter to try again...")
+                continue  # Go back to book selection
+        except ValueError:
+            console.print("[red]Invalid chapter number.[/red]")
+            conn.close()
+            console.input("\nPress Enter to try again...")
+            continue  # Go back to book selection
+        
+        # Get verses for this chapter
+        cursor.execute(
+            "SELECT verse_number, verse_text FROM verses WHERE book_id = ? AND chapter_number = ? ORDER BY verse_number",
+            (book_id, chapter)
+        )
+        verses = cursor.fetchall()
+        conn.close()
+        
+        if not verses:
+            console.print(f"[yellow]No verses found for {selected_book} {chapter}. This chapter may not be downloaded.[/yellow]")
+            console.input("\nPress Enter to try again...")
+            continue  # Go back to book selection
+        
+        # Display the chapter
+        chapter_loop = True
+        while chapter_loop:
+            console.clear()
+            console.print(Panel.fit(f"[bold blue]{selected_book} Chapter {chapter}[/bold blue]", box=box.DOUBLE))
+            
+            # Display verses with nice formatting
+            verse_panel = Panel(
+                "\n".join([f"[bold cyan]{v[0]}[/bold cyan] {v[1]}" for v in verses]),
+                title=f"{selected_book} {chapter}",
+                title_align="left",
+                border_style="green",
+                padding=(1, 2),
+                width=100
+            )
+            console.print(verse_panel)
+            
+            # Navigation options
+            console.print("\n[bold]Navigation:[/bold]")
+            console.print("  [cyan]p[/cyan] - Previous chapter")
+            console.print("  [cyan]n[/cyan] - Next chapter")
+            console.print("  [cyan]m[/cyan] - Mark as current reading position")
+            console.print("  [cyan]b[/cyan] - Back to book selection")
+            console.print("  [cyan]q[/cyan] - Back to main menu")
+            
+            nav_choice = console.input("\n[bold]Choose an option:[/bold] ").strip().lower()
+            
+            if nav_choice == 'p':
+                if chapter > 1:
+                    chapter -= 1
+                    
+                    conn = sqlite3.connect(DB_PATH)
+                    cursor = conn.cursor()
+                    
+                    cursor.execute(
+                        "SELECT verse_number, verse_text FROM verses WHERE book_id = ? AND chapter_number = ? ORDER BY verse_number",
+                        (book_id, chapter)
+                    )
+                    verses = cursor.fetchall()
+                    conn.close()
+                    
+                    if not verses:
+                        console.print(f"[yellow]No verses found for {selected_book} {chapter}. This chapter may not be downloaded.[/yellow]")
+                        console.input("\nPress Enter to continue...")
+                        chapter += 1  # Revert to previous chapter
+                else:
+                    console.print("[yellow]Already at the first chapter.[/yellow]")
+                    console.input("\nPress Enter to continue...")
+            
+            elif nav_choice == 'n':
+                if chapter < total_chapters:
+                    chapter += 1
+                    
+                    conn = sqlite3.connect(DB_PATH)
+                    cursor = conn.cursor()
+                    
+                    cursor.execute(
+                        "SELECT verse_number, verse_text FROM verses WHERE book_id = ? AND chapter_number = ? ORDER BY verse_number",
+                        (book_id, chapter)
+                    )
+                    verses = cursor.fetchall()
+                    conn.close()
+                    
+                    if not verses:
+                        console.print(f"[yellow]No verses found for {selected_book} {chapter}. This chapter may not be downloaded.[/yellow]")
+                        console.input("\nPress Enter to continue...")
+                        chapter -= 1  # Revert to previous chapter
+                else:
+                    console.print("[yellow]Already at the last chapter.[/yellow]")
+                    console.input("\nPress Enter to continue...")
+            
+            elif nav_choice == 'm':
+                update_progress(selected_book, chapter, 1)
+                console.print(f"[green]✓ Set {selected_book} {chapter}:1 as current reading position.[/green]")
+                console.input("\nPress Enter to continue...")
+            
+            elif nav_choice == 'b':
+                chapter_loop = False  # This will exit the chapter loop but not the function
+            
+            elif nav_choice == 'q':
+                return  # This will exit the function completely
+            
+            else:
+                console.print("[red]Invalid choice.[/red]")
+                console.input("\nPress Enter to continue...")
 
 def reset_reading_progress():
     """Reset all reading progress while keeping downloaded books."""
