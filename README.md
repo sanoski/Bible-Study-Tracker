@@ -30,6 +30,31 @@ A command-line application for tracking your progress reading the New World Tran
 - No internet connection required for normal use (all Bible content is included offline)
 - Libraries: requests, beautifulsoup4, rich
 
+## Terminal Compatibility
+
+This application uses the `rich` library to create formatted text, tables, progress bars, and other visual elements in the terminal. For the best experience, use a terminal that fully supports rich text formatting:
+
+### Recommended Terminals
+
+#### Windows (Best Experience)
+- **Windows Terminal** - Microsoft's modern terminal with full support for rich formatting
+- **PowerShell 7 with Windows Terminal** - Ideal combination for the best display quality
+
+#### Linux
+Some formatting issues have been observed in certain Linux terminals. For the best experience on Linux, use:
+- **Konsole** (KDE)
+- **GNOME Terminal** with a compatible font
+- **Alacritty**
+- **Kitty**
+
+### Terminal Configuration Tips
+1. **Use a Nerd Font** - Install a font like Cascadia Code, Fira Code Nerd Font, or JetBrains Mono Nerd Font
+2. **Enable 256 colors or true color (24-bit)** in your terminal
+3. **Use a wide terminal window** (at least 100 columns) for proper table formatting
+4. **Ensure UTF-8 encoding** is set for your terminal
+
+If you experience display issues, particularly with progress bars or special characters, try adjusting these settings or switching to a different terminal emulator.
+
 ## Installation
 
 1. **Clone the repository**
@@ -125,13 +150,20 @@ The app uses SQLite to store all data in a single file (`bible_tracker.db`) with
 
 ## Troubleshooting
 
+### Terminal Display Issues
+- **Broken Progress Bars**: If progress bars appear as strange characters, ensure your terminal supports Unicode block characters and is using a compatible font
+- **Color Problems**: If colors don't display correctly, check that your terminal supports 256 colors or true color
+- **Layout Issues**: If tables or panels look misaligned, try using a larger terminal window or reducing the text size
+
 ### Database Issues
 - **Missing Database**: If the `bible_tracker.db` file is missing, the app will create a new one. However, you'll need to either download the books or restore the database from GitHub.
 - **Corrupted Database**: If you encounter database errors, try replacing the database file with a fresh copy from the GitHub repository.
 - **Database Reset**: If you want to start fresh while keeping all Bible content, use the `x` command to reset your reading progress.
 
-### Reading and Navigation
-- **Display Issues**: If the formatted display doesn't look right, make sure your terminal supports the Rich library's formatting.
+### Platform-Specific Issues
+- **Windows**: The app works best on Windows Terminal. Traditional Command Prompt may have limited formatting support.
+- **Linux**: If using WSL on Windows, consider running the program natively in Windows Terminal instead for better formatting.
+- **Mac**: Terminal.app has limited support for some formatting. Consider using iTerm2 for a better experience.
 
 ## Respecting JW.org Resources
 
@@ -160,6 +192,7 @@ Potential enhancements for future versions:
 - Verse search functionality
 - Verse highlighting and note-taking
 - Mobile application version
+- Improved cross-platform terminal compatibility
 
 ## License
 
