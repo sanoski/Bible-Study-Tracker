@@ -1311,96 +1311,15 @@ def jump_to_position():
     console.input("\nPress Enter to return to the dashboard...")
 
 def download_bible_content():
-    """Menu for downloading Bible content."""
+    """Placeholder for disabled download functionality."""
     console.clear()
-    console.print(Panel.fit("[bold blue]Download Bible Content[/bold blue]", box=box.SIMPLE))
+    console.print(Panel.fit("[bold blue]Bible Download[/bold blue]", box=box.SIMPLE))
     
-    # Get downloaded books
-    downloaded_books = get_downloaded_books()
+    console.print("\n[yellow]The download functionality has been disabled in this version.[/yellow]")
+    console.print("[yellow]All 66 books are already included in the database.[/yellow]")
+    console.print("\n[green]If you need to restore Bible content, please download a fresh copy of the database from GitHub.[/green]")
     
-    if downloaded_books:
-        console.print("\n[bold green]Already Downloaded Books:[/bold green]")
-        for book in downloaded_books:
-            console.print(f"  ✓ {book}")
-    
-    console.print("\n[bold]Options:[/bold]")
-    console.print("1. Download a specific book")
-    console.print("2. Download current book")
-    console.print("3. Cancel")
-    
-    choice = console.input("\n[bold]Choose an option (1-3):[/bold] ").strip()
-    
-    if choice == "1":
-        console.clear()
-        console.print(Panel.fit("[bold blue]Download a Specific Book[/bold blue]", box=box.SIMPLE))
-        
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        
-        cursor.execute("SELECT name FROM books ORDER BY book_order")
-        all_books = [row[0] for row in cursor.fetchall()]
-        conn.close()
-        
-        # Display books in columns
-        book_table = Table(show_header=False, box=box.SIMPLE)
-        cols = 4
-        for _ in range(cols):
-            book_table.add_column("", justify="left")
-        
-        # Fill the table with books
-        rows = []
-        row = []
-        for i, book in enumerate(all_books):
-            prefix = "✓" if book in downloaded_books else " "
-            row.append(f"{prefix} {book}")
-            if (i + 1) % cols == 0:
-                rows.append(row)
-                row = []
-        
-        # Add any remaining books
-        if row:
-            while len(row) < cols:
-                row.append("")
-            rows.append(row)
-        
-        # Add rows to the table
-        for row in rows:
-            book_table.add_row(*row)
-        
-        console.print(book_table)
-        
-        book_name = console.input("\n[bold]Enter the name of the book to download:[/bold] ").strip()
-        
-        # Find closest match
-        match_found = False
-        for book in all_books:
-            if book.lower() == book_name.lower():
-                book_name = book
-                match_found = True
-                break
-        
-        if not match_found:
-            # Try partial match
-            matches = [book for book in all_books if book_name.lower() in book.lower()]
-            if matches:
-                book_name = matches[0]
-                console.print(f"[yellow]Using closest match: {book_name}[/yellow]")
-                download_book(book_name)
-            else:
-                console.print(f"[red]Book '{book_name}' not found.[/red]")
-        else:
-            download_book(book_name)
-    
-    elif choice == "2":
-        book, _, _ = get_current_progress()
-        download_book(book)
-    
-    elif choice != "3":
-        console.print("[red]Invalid choice.[/red]")
-    
-    # Wait for user to press Enter
     console.input("\nPress Enter to return to the dashboard...")
-
 def export_bible_menu():
     """Menu for exporting Bible content to JSON."""
     console.clear()
