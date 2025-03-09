@@ -6,7 +6,7 @@ import time
 from typing import Tuple, List, Dict
 import requests
 from bs4 import BeautifulSoup
-import bible_scraper_v2 as scraper
+#import bible_scraper_v2 as scraper
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -148,38 +148,31 @@ def get_verse_count(book: str, chapter: int) -> int:
 
 # 2. Fix to suppress debug output from the bible_scraper
 def get_verse_text(book: str, chapter: int, verse: int) -> str:
-    """Get the text of a specific verse using the bible_scraper."""
+    """Get the text of a specific verse from the database."""
     try:
-        # Redirect console output and stderr temporarily to capture/suppress the scraper's output
-        import io
-        import sys
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
         
-        original_stdout = sys.stdout
-        original_stderr = sys.stderr
-        sys.stdout = io.StringIO()
-        sys.stderr = io.StringIO()  # Also capture stderr to suppress all output
+        # Get book ID
+        cursor.execute("SELECT id FROM books WHERE name = ?", (book,))
+        result = cursor.fetchone()
+        if not result:
+            return "Book not found."
         
-        # Call the scraper function
-        scraper.get_scripture(book.lower(), chapter, verse)
+        book_id = result[0]
         
-        # Get the captured output
-        output = sys.stdout.getvalue()
+        # Get verse text
+        cursor.execute(
+            "SELECT verse_text FROM verses WHERE book_id = ? AND chapter_number = ? AND verse_number = ?",
+            (book_id, chapter, verse)
+        )
+        result = cursor.fetchone()
         
-        # Restore original stdout and stderr
-        sys.stdout = original_stdout
-        sys.stderr = original_stderr
+        conn.close()
         
-        # Extract just the verse text (remove book, chapter:verse prefix and debug output)
-        lines = output.strip().split('\n')
-        # Filter out debug lines
-        verse_lines = [line for line in lines if not line.startswith("DEBUG:")]
-        
-        if verse_lines and " - " in verse_lines[-1]:
-            return verse_lines[-1].split(" - ", 1)[1].strip()
-        elif verse_lines:
-            return verse_lines[-1].strip()
+        if result:
+            return result[0]
         return "Verse text not available."
-    
     except Exception as e:
         console.print(f"[red]Error retrieving verse: {e}[/red]")
         return "Verse text not available."
