@@ -623,7 +623,7 @@ def view_statistics():
         
         table = Table(show_header=True, header_style="bold")
         table.add_column("Date", style="cyan")
-        table.add_column("Passage", style="green")
+        table.add_column("Chapters Read", style="green")
         
         # Add to table
         for date_str, passages in sorted(stats['reading_by_date'].items(), reverse=True):
@@ -634,13 +634,45 @@ def view_statistics():
             except ValueError:
                 formatted_date = date_str
             
-            # Show the range of passages
-            if len(passages) > 1:
-                first_passage = passages[0]
-                last_passage = passages[-1]
-                table.add_row(formatted_date, f"{first_passage} → {last_passage} ({len(passages)} verses)")
-            else:
-                table.add_row(formatted_date, passages[0])
+            # Group by book and chapter
+            book_chapters = {}
+            for passage in passages:
+                parts = passage.split()
+                book_name = " ".join(parts[:-1])  # Handle books with spaces like "1 Samuel"
+                chapter_verse = parts[-1]
+                chapter = int(chapter_verse.split(':')[0])
+                
+                if book_name not in book_chapters:
+                    book_chapters[book_name] = set()
+                book_chapters[book_name].add(chapter)
+            
+            # Format the reading activity
+            activity_summary = []
+            for book, chapters in book_chapters.items():
+                chapters_list = sorted(list(chapters))
+                
+                # Find consecutive ranges
+                if len(chapters_list) == 1:
+                    activity_summary.append(f"{book} {chapters_list[0]}")
+                else:
+                    # Look for consecutive chapters
+                    ranges = []
+                    start = chapters_list[0]
+                    prev = start
+                    
+                    for chapter in chapters_list[1:] + [None]:
+                        if chapter is None or chapter != prev + 1:
+                            if start == prev:
+                                ranges.append(f"{start}")
+                            else:
+                                ranges.append(f"{start}-{prev}")
+                            if chapter is not None:
+                                start = chapter
+                        prev = chapter if chapter is not None else prev
+                    
+                    activity_summary.append(f"{book} {', '.join(ranges)}")
+            
+            table.add_row(formatted_date, ", ".join(activity_summary))
         
         console.print(table)
     else:

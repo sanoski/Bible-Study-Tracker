@@ -255,7 +255,6 @@ def update_progress(book: str, chapter: int, verse: int, auto_advance=False):
         result = cursor.fetchone()
         total_verses = result[0] if result else 30
         
-        # Always record the current progress first
         timestamp = datetime.datetime.now().isoformat()
         
         # Record the exact verse marked
@@ -275,6 +274,34 @@ def update_progress(book: str, chapter: int, verse: int, auto_advance=False):
             """,
             (book_id, chapter, verse, timestamp)
         )
+        
+        # If marking the last verse or beyond, consider the chapter complete
+        # Record all verses in the chapter as read if not already read
+        if verse >= total_verses:
+            # For each verse in the chapter, check if it's already in reading history
+            for v in range(1, total_verses + 1):
+                # Skip the current verse which was already added
+                if v == verse:
+                    continue
+                    
+                # Check if this verse is already in reading history
+                cursor.execute(
+                    """
+                    SELECT COUNT(*) FROM reading_history 
+                    WHERE book_id = ? AND chapter_number = ? AND verse_number = ?
+                    """,
+                    (book_id, chapter, v)
+                )
+                
+                if cursor.fetchone()[0] == 0:
+                    # Add this verse to reading history
+                    cursor.execute(
+                        """
+                        INSERT INTO reading_history (book_id, chapter_number, verse_number, date_read)
+                        VALUES (?, ?, ?, ?)
+                        """,
+                        (book_id, chapter, v, timestamp)
+                    )
         
         # If auto-advancing, move to the next chapter or book
         if verse >= total_verses and auto_advance:
@@ -346,6 +373,7 @@ def update_progress(book: str, chapter: int, verse: int, auto_advance=False):
     finally:
         conn.close()
 
+        
 def reset_reading_progress():
     """Reset all reading progress while keeping verses."""
     conn = get_connection()
