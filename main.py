@@ -4,6 +4,8 @@ Bible Tracker - Main Application
 A console application to track Bible reading progress
 """
 
+VERSION = "2.0"
+
 import db
 import ui
 
@@ -29,6 +31,8 @@ def main():
             ui.view_statistics()
         elif choice == 'x':
             ui.reset_reading_progress()
+        elif choice == 'v':
+            ui.display_version_info()
         elif choice == 'q':
             ui.console.print("[yellow]Goodbye![/yellow]")
             break

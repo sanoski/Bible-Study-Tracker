@@ -19,8 +19,7 @@ def clear_screen():
 def display_dashboard():
     """Display the main dashboard."""
     clear_screen()
-    console.print(Panel.fit("[bold blue]Bible Study Tracker[/bold blue]", box=box.DOUBLE))
-    
+    console.print(Panel.fit("[bold blue]Bible Study Tracker v2.0[/bold blue]", box=box.DOUBLE))    
     # Get current progress
     book, chapter, verse = tracker.get_current_position()
     console.print(f"\n[bold green]Current Position:[/bold green] {book} {chapter}:{verse}")
@@ -133,8 +132,27 @@ def display_dashboard():
     console.print("  [cyan]e[/cyan] - Export Bible to JSON")
     console.print("  [cyan]b[/cyan] - Read Bible books")
     console.print("  [cyan]s[/cyan] - View statistics")
+    console.print("  [cyan]v[/cyan] - View version information")
     console.print("  [cyan]x[/cyan] - Reset reading progress")
+
     console.print("  [cyan]q[/cyan] - Quit")
+
+def display_version_info():
+    """Display version information."""
+    clear_screen()
+    console.print(Panel.fit("[bold blue]Bible Study Tracker[/bold blue]", box=box.DOUBLE))
+    console.print("\n[bold cyan]Version:[/bold cyan] 2.0")
+    console.print("\n[bold cyan]Release Date:[/bold cyan] March 2025")
+    console.print("\n[bold cyan]Author:[/bold cyan] Sanoski")
+    console.print("\n[bold cyan]GitHub:[/bold cyan] https://github.com/sanoski/Bible-Study-Tracker")
+    console.print("\n[bold cyan]Changes in this version:[/bold cyan]")
+    console.print("  • Complete code refactoring into modular architecture")
+    console.print("  • Fixed database tracking issues")
+    console.print("  • Improved reading statistics")
+    console.print("  • Removed unnecessary dependencies")
+    console.print("  • Performance improvements")
+    
+    console.input("\nPress Enter to return to the dashboard...")
 
 def display_chapter_grid(book):
     """Display a grid of chapters showing which ones are completed."""
