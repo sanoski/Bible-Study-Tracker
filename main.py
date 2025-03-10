@@ -17,7 +17,7 @@ def main():
     while True:
         ui.display_dashboard()
         
-        choice = ui.console.input("\n[bold]Enter command (u/r/e/b/s/x/q):[/bold] ").strip().lower()
+        choice = ui.console.input("\n[bold]Enter command (u/r/e/b/s/x/v/q):[/bold] ").strip().lower()
         
         if choice == 'u':
             ui.update_reading_progress()
